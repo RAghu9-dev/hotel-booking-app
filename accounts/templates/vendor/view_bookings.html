@@ -1,0 +1,41 @@
+
+{% extends 'utils/vendor/vendor_base.html' %}
+
+{% block start %}
+    
+<div class="container mt-5">
+
+    <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Customer Name</th>
+      <th scope="col">Hotel Name</th>
+      <th scope="col">From date</th>
+      <th scope="col">To date</th>
+      <th scope="col">Total Booking Days</th>
+      <th scope="col">Total Price</th>
+      <th scope="col">Hotel Location</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for booking in bookings %}
+    <tr>
+      <th scope="row">{{ forloop.counter }}</th>
+      <td>{{booking.booking_user.first_name}} {{booking.booking_user.last_name}}</td>
+      <td>{{booking.hotel.hotel_name}}</td>
+      <td>{{booking.booking_start_date}}</td>
+      <td>{{booking.booking_end_date}}</td>
+      <td>{{booking.total_booking_days}}</td>
+      <td>{{booking.booking_price}}</td>
+      <td>{{booking.hotel.hotel_location}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+</div>
+
+
+
+{% endblock %}

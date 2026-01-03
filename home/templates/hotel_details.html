@@ -1,0 +1,50 @@
+{% extends 'utils/base.html' %}
+
+{% block start %}
+
+    <div class="container p-4">
+        <h1>{{hotel_details.hotel_name}}</h1>
+        <p>{{hotel_details.hotel_description}}</p>
+        <hr>
+        
+        <div>
+            <h4>Ameneites Available: </h4>
+            <div class="d-flex flex-row justify-content-around">
+                {% for amenity in hotel_details.ameneties.all %}
+                <div class="mt-4 mb-4">
+                    <img src = "{{ amenity.icon.url }}" style="height: 80px;" alt="{{ amenity.amenetie_name }}"/>
+                    <p class="" type=""><b>{{amenity.amenetie_name}}</b></p>
+                </div>
+                {% endfor %}
+            </div>
+            <p>Hotel Price: <b>${{hotel_details.hotel_price}}</b></p>
+            <p>Offer Price: <b>${{hotel_details.hotel_offer_price}}</b></p>
+        </div>
+
+
+        <form method="POST" class="card shadow-lg p-4 d-flex flex-column" >
+            {% csrf_token %}
+            {% include 'utils/alerts.html' %}
+            <div class="mb-3">
+                <label for="forStartData" class="form-label"><b>Start Date:</b></label>
+                <input type="date" class="form-control" id="forStartData" min="{{ today_date }}" name="start-date">
+            </div>
+            <div class="mb-3">
+                <label for="forEndDate" class="form-label"><b>End Date:</b></label>
+                <input type="date" class="form-control" id="forEndDate" min="{{ today_date }}" name="end-date">
+            </div>
+            {% if user.is_authenticated %}
+                <button class="btn btn-danger align-self-center" style="width: 100px;" type="submit">Book Now</button>
+            {% else %}
+            <a class="nav-link" href="{% url 'login' %}"><button type="button">Login</button></a>
+            {% endif %}
+
+        </form>
+
+
+
+    </div>
+
+        
+    
+{% endblock %}

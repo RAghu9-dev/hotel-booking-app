@@ -1,0 +1,88 @@
+{% extends 'utils/vendor/vendor_base.html' %}
+
+{% block start %}
+
+
+<div class="container card shadow mt-5 p-5" style="width: 600px; border: none;">
+
+    <form class="p-2" method="POST">
+        {% csrf_token %}
+        {% include 'utils/alerts.html' %}
+        <h1 class="text-center">Hotel Details</h1>
+        <div class="mb-3">
+            <label for="forHotelName" class="form-label">Name</label>
+            <input 
+                type="text" 
+                class="form-control" 
+                id="forHotelName" 
+                name="name"
+                placeholder="Sadiq Luxuaries"
+            >
+        </div>
+
+        <div class="form-floating mb-3">
+            <textarea class="form-control" placeholder="Leave a comment here" id="floatingTextarea" name="description"></textarea>
+            <label for="floatingTextarea">description</label>
+        </div>
+
+        <div class="mb-3">
+            <label>Select Hotel Amenties</label>
+            <select name="ameneties" class="form-select form-select-sm" multiple aria-label="Small select example">
+                {% for amenetie in hotel_ameneties %}
+                    <option value="{{amenetie.id}}">{{amenetie.amenetie_name}}</option>
+                {% endfor %}
+              </select>
+        </div>
+
+        <!-- <div class="mb-3">
+            <label for="forOwner" class="form-label">Owner</label>
+            <input 
+                type="text" 
+                class="form-control" 
+                id="forOwner" 
+                name="owner"
+                placeholder="Enter Owner Name"
+            >
+        </div> -->
+
+        <div class="mb-3">
+            <label for="hotelPrice" class="form-label">Hotel Price</label>
+            <input 
+                type="text" 
+                class="form-control" 
+                id="hotelPrice"  
+                name="hotel_price"
+                placeholder="$1000"
+            >
+        </div>
+
+        <div class="mb-3">
+            <label for="forHotelOfferPrice" class="form-label">Hotel Offer Price</label>
+            <input 
+                type="text" 
+                class="form-control" 
+                id="forHotelOfferPrice" 
+                name="hotel_offer_price"
+                placeholder="$800"
+            >
+        </div>
+
+        <div class="mb-3">
+            <label for="forLocation" class="form-label">Location</label>
+            <input 
+                type="text" 
+                class="form-control" 
+                id="forLocation" 
+                name="location"
+                placeholder="Mumbai"
+            >
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+
+
+
+
+{% endblock %}

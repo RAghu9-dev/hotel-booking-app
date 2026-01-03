@@ -5,7 +5,7 @@
 
 <div class="container card shadow mt-5 p-5" style="width: 600px; border: none;">
 
-    <form class="p-2" method="POST">
+    <form class="p-2" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         {% include 'utils/alerts.html' %}
         <h1 class="text-center">Hotel Details</h1>
@@ -16,7 +16,7 @@
                 class="form-control" 
                 id="forHotelName" 
                 name="name"
-                placeholder="Sadiq Luxuaries"
+                placeholder="Hotel Name"
             >
         </div>
 
@@ -26,7 +26,7 @@
         </div>
 
         <div class="mb-3">
-            <label>Select Hotel Amenties</label>
+            <label>Select Hotel Amenities</label>
             <select name="ameneties" class="form-select form-select-sm" multiple aria-label="Small select example">
                 {% for amenetie in hotel_ameneties %}
                     <option value="{{amenetie.id}}">{{amenetie.amenetie_name}}</option>
@@ -76,6 +76,19 @@
                 name="location"
                 placeholder="Mumbai"
             >
+        </div>
+
+        <div class="mb-3">
+            <label for="forImages" class="form-label">Hotel Images (Optional)</label>
+            <input 
+                type="file" 
+                class="form-control" 
+                id="forImages" 
+                name="images"
+                multiple
+                accept="image/*"
+            >
+            <div class="form-text">You can select multiple images at once. Images can also be added later.</div>
         </div>
 
         <button type="submit" class="btn btn-primary">Submit</button>

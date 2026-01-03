@@ -216,54 +216,78 @@ def vendor_register_view(request):
 
 
 def setImages(hotels):
-    shared_images = list(HotelImages.objects.filter(hotel_id=109))
     for hotel in hotels:
-        if shared_images:
-            random_image = random.choice(shared_images)
-            hotel.image_url = random_image.image.url
+        # Get the first image for this hotel
+        first_image = hotel.hotel_images.first()
+        if first_image:
+            hotel.image_url = first_image.image.url
         else:
             hotel.image_url = None
     return hotels
 
 @login_required(login_url="/accounts/vendor-login/")
 def vendor_dashboard_view(request):
-    hotels = Hotel.objects.filter(hotel_owner = request.user.id)
+    hotels = Hotel.objects.filter(hotel_owner=request.user.id).prefetch_related('hotel_images')
     hotels = setImages(hotels)
     context = {
         'hotels':hotels[:10]
     }
     return render(request, "vendor/vendor_dashboard.html", context)
 
+@login_required(login_url="/accounts/vendor-login/")
 def add_hotel_view(request):
     if request.method == 'POST':
-        hotel_name = request.POST.get('name')
-        hotel_description = request.POST.get('description')
-        ameneties_ids = request.POST.getlist('ameneties')
-        hotel_price = request.POST.get('hotel_price')
-        hotel_offer_price = request.POST.get('hotel_offer_price')
-        hotel_location = request.POST.get('location')
-        hotel_slug = generate_slug(hotel_name)
-
         try:
-            hotel_vendor = request.user.hotelvendor
-        except HotelVendor.DoesNotExist:
-            messages.error(request, "Only vendors can add hotels.")
-            return redirect("/")
+            hotel_name = request.POST.get('name')
+            hotel_description = request.POST.get('description')
+            ameneties_ids = request.POST.getlist('ameneties')
+            hotel_price = request.POST.get('hotel_price')
+            hotel_offer_price = request.POST.get('hotel_offer_price')
+            hotel_location = request.POST.get('location')
+            
+            # Validate required fields
+            if not hotel_name or not hotel_location or not hotel_price or not hotel_offer_price:
+                messages.error(request, "Please fill in all required fields (Name, Location, Hotel Price, Offer Price).")
+                return redirect("add-hotel")
+            
+            hotel_slug = generate_slug(hotel_name)
 
-        hotel_obj = Hotel.objects.create(
-            hotel_name=hotel_name,
-            hotel_description=hotel_description,
-            hotel_slug=hotel_slug,
-            hotel_owner=hotel_vendor,
-            hotel_price=hotel_price,
-            hotel_offer_price=hotel_offer_price,
-            hotel_location=hotel_location,
-        )
-        amenities = Ameneties.objects.filter(id__in=ameneties_ids)
-        hotel_obj.ameneties.add(*amenities)
+            # Get the vendor - with multi-table inheritance, we need to query HotelVendor
+            try:
+                hotel_vendor = HotelVendor.objects.get(id=request.user.id)
+            except HotelVendor.DoesNotExist:
+                messages.error(request, "Only vendors can add hotels. Please login as a vendor.")
+                return redirect("/accounts/vendor-login/")
 
-        messages.success(request, "Hotel created successfully")
-        return redirect("add-hotel")
+            hotel_obj = Hotel.objects.create(
+                hotel_name=hotel_name,
+                hotel_description=hotel_description,
+                hotel_slug=hotel_slug,
+                hotel_owner=hotel_vendor,
+                hotel_price=float(hotel_price),
+                hotel_offer_price=float(hotel_offer_price),
+                hotel_location=hotel_location,
+            )
+            
+            # Add amenities if selected
+            if ameneties_ids:
+                amenities = Ameneties.objects.filter(id__in=ameneties_ids)
+                hotel_obj.ameneties.add(*amenities)
+
+            # Handle image uploads
+            images = request.FILES.getlist('images')
+            if images:
+                for image in images:
+                    HotelImages.objects.create(hotel=hotel_obj, image=image)
+                messages.success(request, f"Hotel created successfully with {len(images)} image(s).")
+            else:
+                messages.success(request, "Hotel created successfully. You can add images later.")
+
+            return redirect("vendor-dashboard")
+            
+        except Exception as e:
+            messages.error(request, f"Error creating hotel: {str(e)}")
+            return redirect("add-hotel")
 
     ameneties = Ameneties.objects.all()
     context = {
@@ -280,7 +304,6 @@ def upload_images_view(request, slug):
             hotel = hotel_obj,
             image = image
         )
-        print(image)
 
         return HttpResponseRedirect(request.path_info)
     return render(request, "vendor/upload_image.html", context = {'images' : hotel_obj.hotel_images.all()})
@@ -327,21 +350,25 @@ def edit_hotel_view(request, slug):
     return render(request, "vendor/edit_hotel_details.html", context)
 
 from datetime import date, datetime
+@login_required(login_url="/accounts/vendor-login/")
 def view_bookings_view(request):
-    bookings = HotelBooking.objects.all()
-    vendor_bookings = []
+    """View for vendors to see bookings for their hotels"""
+    # Get bookings for hotels owned by this vendor
+    bookings = HotelBooking.objects.filter(
+        hotel__hotel_owner__id=request.user.id
+    ).select_related('hotel', 'booking_user').order_by('-booking_start_date')
+    
+    # Calculate booking days for each booking
     for booking in bookings:
-        hotel = booking.hotel
-        if hotel.hotel_owner.id == request.user.id:
-            booking_start_date = str(booking.booking_start_date)
-            booking_end_date = str(booking.booking_end_date)
-            start_date = datetime.strptime(booking_start_date, '%Y-%m-%d')
-            end_date = datetime.strptime(booking_end_date, '%Y-%m-%d')
-            days_count = (end_date-start_date).days
-            booking.total_booking_days = days_count
-            vendor_bookings.append(booking)
+        booking_start_date = str(booking.booking_start_date)
+        booking_end_date = str(booking.booking_end_date)
+        start_date = datetime.strptime(booking_start_date, '%Y-%m-%d')
+        end_date = datetime.strptime(booking_end_date, '%Y-%m-%d')
+        days_count = (end_date - start_date).days
+        booking.total_booking_days = days_count
+    
     context = {
-        'bookings':vendor_bookings
+        'bookings': bookings
     }
     return render(request, "vendor/view_bookings.html", context)
 

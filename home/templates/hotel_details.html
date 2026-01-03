@@ -7,6 +7,21 @@
         <p>{{hotel_details.hotel_description}}</p>
         <hr>
         
+        <!-- Hotel Images Gallery -->
+        {% if hotel_details.hotel_images.all %}
+        <div class="mb-4">
+            <h4>Hotel Images</h4>
+            <div class="row">
+                {% for image in hotel_details.hotel_images.all %}
+                <div class="col-md-4 mb-3">
+                    <img src="{{ image.image.url }}" class="img-fluid rounded shadow" alt="Hotel Image {{ forloop.counter }}" style="width: 100%; height: 250px; object-fit: cover;">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <hr>
+        {% endif %}
+        
         <div>
             <h4>Ameneites Available: </h4>
             <div class="d-flex flex-row justify-content-around">

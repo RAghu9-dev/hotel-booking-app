@@ -4,8 +4,11 @@
 {% block start %}
     
 <div class="container mt-5">
-
-    <table class="table">
+    <h2 class="mb-4">Hotel Bookings</h2>
+    
+    {% if bookings %}
+    {% include 'utils/alerts.html' %}
+    <table class="table table-striped">
   <thead>
     <tr>
       <th scope="col">#</th>
@@ -31,9 +34,14 @@
       <td>{{booking.hotel.hotel_location}}</td>
     </tr>
     {% endfor %}
-  </tbody>
+    </tbody>
 </table>
-
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        <h4>No bookings found!</h4>
+        <p>You don't have any bookings for your hotels yet. Bookings will appear here when customers book your hotels.</p>
+    </div>
+    {% endif %}
 </div>
 
 

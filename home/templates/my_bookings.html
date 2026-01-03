@@ -1,0 +1,53 @@
+{% extends 'utils/base.html' %}
+
+{% block start %}
+
+<div class="container mt-5">
+    <h2 class="mb-4">My Bookings</h2>
+    
+    {% if bookings %}
+    {% include 'utils/alerts.html' %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Hotel Name</th>
+                <th scope="col">Location</th>
+                <th scope="col">Check-in Date</th>
+                <th scope="col">Check-out Date</th>
+                <th scope="col">Total Days</th>
+                <th scope="col">Total Price</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td><strong>{{ booking.hotel.hotel_name }}</strong></td>
+                <td>{{ booking.hotel.hotel_location }}</td>
+                <td>{{ booking.booking_start_date }}</td>
+                <td>{{ booking.booking_end_date }}</td>
+                <td>{{ booking.total_booking_days }} day{{ booking.total_booking_days|pluralize }}</td>
+                <td><strong>${{ booking.booking_price }}</strong></td>
+                <td>
+                    <a href="{% url 'cancel-booking' booking.id %}" 
+                       class="btn btn-danger btn-sm"
+                       onclick="return confirm('Are you sure you want to cancel this booking?');">
+                        Cancel
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        <h4>No bookings found!</h4>
+        <p>You haven't made any bookings yet. <a href="{% url 'index' %}" class="alert-link">Browse hotels</a> to make your first booking.</p>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+

@@ -5,9 +5,7 @@ import random
 from datetime import date, datetime
 from django.contrib import messages
 from django.http import HttpResponseRedirect
-from django.views.decorators.cache import cache_page
 from django.db.models import Prefetch
-# Create your views here.
 
 def setImages(hotels):
     for hotel in hotels:
@@ -19,28 +17,7 @@ def setImages(hotels):
             hotel.image_url = None
     return hotels
 
-
 @login_required
-@cache_page(60*2)
-# def index(request):
-#     hotels = Hotel.objects.all().select_related('hotel_owner')
-#       # You can set a default image in template if needed
-#     search = request.GET.get('search')
-#     if search:
-#         total_hotels = hotels.filter(hotel_name__icontains = search)
-#         hotels = setImages(total_hotels)
-#     sort_by = request.GET.get('sort_by')
-#     if sort_by:
-#         if sort_by == 'sort_low':
-#             hotels = hotels.order_by('hotel_offer_price')
-
-#         elif sort_by == 'sort_high':
-#             hotels = hotels.order_by('-hotel_offer_price')
-
-#     hotels = setImages(hotels)
-#     context = {'hotels': hotels}
-#     return render(request, 'index.html', context)
-
 def index(request):
     search = request.GET.get('search')
     sort_by = request.GET.get('sort_by')
@@ -62,8 +39,6 @@ def index(request):
 
     context = {'hotels': hotels}
     return render(request, 'index.html', context)
-
-
 
 import math
 def hotel_details_view(request, slug):
@@ -139,7 +114,6 @@ def hotel_details_view(request, slug):
 
 @login_required
 def my_bookings_view(request):
-    """View for customers to see their own bookings"""
     bookings = HotelBooking.objects.filter(booking_user=request.user).order_by('-booking_start_date')
     
     # Calculate booking days for each booking
@@ -158,7 +132,6 @@ def my_bookings_view(request):
 
 @login_required
 def cancel_booking_view(request, booking_id):
-    """View to cancel a booking"""
     try:
         booking = HotelBooking.objects.get(id=booking_id, booking_user=request.user)
         hotel_name = booking.hotel.hotel_name

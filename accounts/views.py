@@ -12,23 +12,42 @@ def login_view(request):
     if request.method == 'POST':
         user_email = request.POST.get('email')
         password = request.POST.get('password')
+        next_url = request.GET.get('next') or request.POST.get('next')
 
-        hotel_user = HotelUser.objects.filter(email = user_email)
-        if not hotel_user:
+        try:
+            hotel_user = HotelUser.objects.get(email=user_email)
+        except HotelUser.DoesNotExist:
             messages.warning(request, "Incorrect email address")
+            if next_url:
+                return redirect(f"/accounts/login/?next={next_url}")
             return redirect("/accounts/login/")
         
-        if not hotel_user[0].is_verified:
+        if not hotel_user.is_verified:
             messages.warning(request, "Please verify your account, Check your email inbox.")
+            if next_url:
+                return redirect(f"/accounts/login/?next={next_url}")
             return redirect("/accounts/login/")
 
-        user = authenticate(request, username = hotel_user[0].username, password=password)
-        if not user:
-            print("authentication failed")
+        if not hotel_user.check_password(password):
             messages.warning(request, "Incorrect password")
+            if next_url:
+                return redirect(f"/accounts/login/?next={next_url}")
             return redirect("/accounts/login/")
-        login(request, user)
-        return redirect("/")    
+        
+        if request.user.is_authenticated:
+            try:
+                HotelVendor.objects.get(id=request.user.id)
+                logout(request)
+                messages.info(request, "You were logged out from vendor account. Now logged in as customer.")
+            except HotelVendor.DoesNotExist:
+                pass
+        
+        login(request, hotel_user)
+        
+        if next_url:
+            return redirect(next_url)
+        return redirect('index')
+
     return render(request, 'login.html')
 
 def login_with_otp_view(request):
@@ -73,7 +92,7 @@ def verify_otp_view(request, email, otp):
         }
         return render(request, "login_otp.html", context)
     login(request, hotel_user)
-    return redirect("/")
+    return redirect('index')
     
 def logout_view(request):
     logout(request)
@@ -165,6 +184,16 @@ def vendor_login_view(request):
         if user is None:
             messages.warning(request, "Incorrect password")
             return redirect("/accounts/vendor-login/")
+
+        # If user is already logged in as a customer, logout first
+        if request.user.is_authenticated:
+            try:
+                # Check if currently logged in as customer
+                HotelUser.objects.get(id=request.user.id)
+                logout(request)
+                messages.info(request, "You were logged out from customer account. Now logged in as vendor.")
+            except HotelUser.DoesNotExist:
+                pass  # Not a customer, or not logged in
 
         login(request, user)
         return redirect("/accounts/vendor-dashboard/")
@@ -348,6 +377,32 @@ def edit_hotel_view(request, slug):
     }
     
     return render(request, "vendor/edit_hotel_details.html", context)
+
+@login_required(login_url="/accounts/vendor-login/")
+def delete_hotel_view(request, slug):
+    """View for vendors to delete their hotels"""
+    try:
+        hotel_obj = Hotel.objects.get(hotel_slug=slug)
+    except Hotel.DoesNotExist:
+        messages.error(request, "Hotel not found.")
+        return redirect('vendor-dashboard')
+    
+    # Check if the logged-in vendor owns this hotel
+    try:
+        vendor = HotelVendor.objects.get(id=request.user.id)
+    except HotelVendor.DoesNotExist:
+        messages.error(request, "Only vendors can delete hotels.")
+        return redirect('vendor-dashboard')
+    
+    if hotel_obj.hotel_owner.id != request.user.id:
+        messages.error(request, "You can only delete your own hotels.")
+        return redirect('vendor-dashboard')
+    
+    # Delete the hotel (this will cascade delete related images and bookings)
+    hotel_name = hotel_obj.hotel_name
+    hotel_obj.delete()
+    messages.success(request, f"Hotel '{hotel_name}' has been deleted successfully.")
+    return redirect('vendor-dashboard')
 
 from datetime import date, datetime
 @login_required(login_url="/accounts/vendor-login/")

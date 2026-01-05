@@ -39,6 +39,13 @@
                         <a href="{% url 'upload-image' hotel.hotel_slug %}"><button class="btn btn-success mb-3 mt-4">upload image</button></a>
                         <a href="{% url 'edit-hotel' hotel.hotel_slug %}"><button class="btn btn-warning mb-3 text-white mt-4">edit hotel</button></a>
                     </div>
+                    <div class="d-flex justify-content-center mb-3">
+                        <a href="{% url 'delete-hotel' hotel.hotel_slug %}" 
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('Are you sure you want to delete {{ hotel.hotel_name }}? This action cannot be undone.');">
+                            Delete Hotel
+                        </a>
+                    </div>
 
                 </div>
                 

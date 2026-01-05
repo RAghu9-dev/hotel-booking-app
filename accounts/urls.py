@@ -22,4 +22,5 @@ urlpatterns = [
     path('<slug>/upload-image', views.upload_images_view, name="upload-image"),
     path('<id>/delete-image/', views.delete_images_view, name="delete-image"),
     path('<slug>/edit-hotel-details/', views.edit_hotel_view, name='edit-hotel'),
+    path('<slug>/delete-hotel/', views.delete_hotel_view, name='delete-hotel'),
 ]

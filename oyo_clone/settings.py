@@ -84,15 +84,13 @@ WSGI_APPLICATION = 'oyo_clone.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+import os
+import dj_database_url
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'hotel_bookings_app',
-        'USER':'postgres',
-        'PASSWORD':'Raghu@123',
-        'HOST':'localhost',
-        'PORT':5432,
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL')
+    )
 }
 
 

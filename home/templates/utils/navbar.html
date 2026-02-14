@@ -1,35 +1,23 @@
 <nav class="navbar navbar-expand-lg navbar-dark shadow-lg p-2 nav" style="background-color: rgba(0, 0, 0, 0.573);position: relative;" >
 
-  <div class="container-fluid">
-
-    <!-- Logo -->
-    <a class="navbar-brand" href="/">
+  <div class="container-fluid" >
+     <a class="navbar-brand" href="/">
       <img src="https://tint.creativemarket.com/tzhstW1G2SFwQS7uFTsroXYWnf0MqjgXLS4csSBkmhk/width:1200/height:800/gravity:nowe/rt:fill-down/el:1/preset:cm_watermark_retina/czM6Ly9maWxlcy5jcmVhdGl2ZW1hcmtldC5jb20vaW1hZ2VzL3NjcmVlbnNob3RzL3Byb2R1Y3RzLzYwOC82MDg4LzYwODgxODMvbGcyLW8uanBn?1714232871"
-           height="50" alt="BookMyStay"/>
+       height="50" alt="BookMyStay"/>
     </a>
-
-    <!-- Mobile toggle -->
-    <!-- <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-            data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown"
-            aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button> -->
-
+   
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-
-    <!-- Navbar links -->
-    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+    <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
-
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="/">Home</a>
+          <a class="nav-link active p-3 " aria-current="page" href="/">Home</a>
         </li>
 
         {% if user.is_authenticated %}
-          <!-- Logged-in user -->
-          <li class="nav-item">
+         <!-- Logged-in user -->
+        <li class="nav-item">
             <a class="nav-link" href="{% url 'my-bookings' %}">My Bookings</a>
           </li>
           <li class="nav-item">
@@ -44,12 +32,10 @@
           <li class="nav-item">
             <a class="nav-link" href="{% url 'register' %}">Register</a>
           </li>
-        {% endif %}
+          {% endif %}
 
       </ul>
     </div>
 
   </div>
 </nav>
-
-
